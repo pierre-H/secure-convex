@@ -1,0 +1,23 @@
+{
+    "name": "secure-convex",
+    "module": "index.ts",
+    "type": "module",
+    "devDependencies": {
+        "@edge-runtime/vm": "^5.0.0",
+        "@types/bun": "latest",
+        "convex-test": "^0.0.38",
+        "vitest": "^3.2.4"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    },
+    "dependencies": {
+        "convex": "^1.25.4",
+        "convex-helpers": "^0.1.103",
+        "permix": "^3.5.0",
+        "valibot": "^1.1.0"
+    },
+    "scripts": {
+        "test": "vitest"
+    }
+}
