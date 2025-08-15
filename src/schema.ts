@@ -1,4 +1,4 @@
-import { defineSchema, defineTable } from "convex/server";
+import { defineTable } from "convex/server";
 import {
     valibotToConvex,
     type ValibotTable,
@@ -6,7 +6,7 @@ import {
     type ConvexTableDefFromValibot,
 } from "./schemaValidation";
 
-function defineSecureTable<
+export function defineSecureTable<
     T extends ValibotTable<O>,
     O extends OnlyObjectOptions,
 >(tableDefinition: T) {
@@ -17,23 +17,4 @@ function defineSecureTable<
         ])
     );
     return defineTable(convexShape as ConvexTableDefFromValibot<T, O>);
-}
-
-export function defineSecureSchema<
-    T extends Record<string, ValibotTable<OnlyObjectOptions>>,
->(schemaDef: T) {
-    // Construction du schéma avec préservation des types
-    const schema: Record<string, ReturnType<typeof defineSecureTable>> = {};
-
-    for (const [tableName, tableDefinition] of Object.entries(schemaDef)) {
-        schema[tableName] = defineSecureTable(tableDefinition);
-    }
-
-    return defineSchema(
-        schema as {
-            [K in keyof T]: ReturnType<
-                typeof defineSecureTable<T[K], OnlyObjectOptions>
-            >;
-        }
-    );
 }
