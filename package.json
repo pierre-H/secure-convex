@@ -1,12 +1,12 @@
 {
     "name": "secure-convex",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "A library to secure your Convex database with Valibot and Permix",
     "author": {
         "name": "Pierre PIRNAY",
         "url": "https://github.com/pierre-H/"
     },
-    "module": "index.ts",
+    "module": "src/index.ts",
     "type": "module",
     "devDependencies": {
         "@edge-runtime/vm": "^5.0.0",
@@ -24,6 +24,9 @@
         "valibot": "^1.1.0"
     },
     "scripts": {
-        "test": "vitest"
-    }
+        "test": "vitest",
+        "build": "tsc"
+    },
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts"
 }

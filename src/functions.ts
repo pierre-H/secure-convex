@@ -1,34 +1,48 @@
 import {
-    customCtx,
     customMutation,
+    type CustomBuilder,
 } from "convex-helpers/server/customFunctions";
 import {
     isValibotSchema,
     type AnyVSchema,
     type OnlyObjectOptions,
-    type UnionTable,
     type ValibotTable,
+    type UnionTable,
 } from "./schemaValidation";
 import type {
-    FunctionVisibility,
-    GenericDataModel,
     MutationBuilder,
+    GenericMutationCtx,
+    GenericDataModel,
+    FunctionVisibility,
 } from "convex/server";
 import * as v from "valibot";
 
 export function secureMutation<
-    T extends Record<string, ValibotTable<OnlyObjectOptions>>,
-    Visibility extends FunctionVisibility,
     DataModel extends GenericDataModel,
->(schema: T, mutation: MutationBuilder<DataModel, Visibility>) {
-    return customMutation(
-        mutation,
-        customCtx(async (ctx) => {
+    Visibility extends FunctionVisibility,
+>(
+    schema: Record<string, ValibotTable<OnlyObjectOptions>>,
+    mutation: MutationBuilder<DataModel, Visibility>
+): CustomBuilder<
+    "mutation",
+    {},
+    {
+        insecureDb: GenericMutationCtx<DataModel>["db"];
+        db: GenericMutationCtx<DataModel>["db"];
+    },
+    {},
+    GenericMutationCtx<DataModel>,
+    Visibility,
+    {}
+> {
+    return customMutation(mutation, {
+        args: {},
+        input: async (ctx) => {
             const secureInsert: typeof ctx.db.insert = async (
                 tableName,
                 data
             ) => {
-                const tableDef = schema[tableName as keyof T];
+                const tableDef = schema[tableName as string];
 
                 if (tableDef) {
                     const validator = isValibotSchema(tableDef)
@@ -44,7 +58,7 @@ export function secureMutation<
             };
 
             const secureReplace: typeof ctx.db.replace = async (id, data) => {
-                const tableDef = schema[id.__tableName as keyof T];
+                const tableDef = schema[id.__tableName as string];
 
                 if (tableDef) {
                     const validator = isValibotSchema(tableDef)
@@ -60,7 +74,7 @@ export function secureMutation<
             };
 
             const securePatch: typeof ctx.db.patch = async (id, data) => {
-                const tableDef = schema[id.__tableName as keyof T];
+                const tableDef = schema[id.__tableName as string];
 
                 if (tableDef) {
                     const keysToKeep = Object.keys(data);
@@ -99,7 +113,7 @@ export function secureMutation<
                 return await ctx.db.patch(id, data);
             };
 
-            return {
+            const newCtx = {
                 insecureDb: ctx.db,
                 db: {
                     ...ctx.db,
@@ -108,6 +122,11 @@ export function secureMutation<
                     patch: securePatch,
                 },
             };
-        })
-    );
+
+            return {
+                ctx: newCtx,
+                args: {},
+            };
+        },
+    });
 }

@@ -331,10 +331,10 @@ export type ConvexTableDefFromValibot<
     O extends OnlyObjectOptions = OnlyObjectOptions,
 > =
     T extends Record<string, AnyVSchema>
-        ? ConvexObjectShapeFromValibot<T> // -> { hello: v.string(), ... }
+        ? ConvexObjectShapeFromValibot<T>
         : T extends valibot.UnionSchema<infer U, any>
           ? U extends OnlyObjectOptions
-              ? VUnion<valibot.InferOutput<T>, U[number]["entries"]>
+              ? Validator<valibot.InferOutput<T>, "required", string>
               : never
           : never;
 
