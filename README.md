@@ -54,8 +54,17 @@ Use it in your Convex schema:
 
 ```ts
 // convex/schema.ts
-import { defineSecureSchema } from "secure-convex";
+import { defineSchema } from "convex/server";
+import { defineSecureTable } from "secure-convex";
 import { myDb } from "./db.ts";
 
-export default defineSecureSchema(myDb);
+const schema = defineSchema({
+    users: defineSecureTable(myDb.users).index("byEmail", ["email"]),
+    posts: defineSecureTable(myDb.posts).index("byStatusHighlited", [
+        "status",
+        "highlighted",
+    ]),
+});
+
+export default schema;
 ```
