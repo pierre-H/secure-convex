@@ -169,7 +169,7 @@ describe("valibotToConvex", () => {
         });
 
         it("should convert optional convexId", () => {
-            const schema = valibot.optional(convexId("orders"));
+            const schema = valibot.exactOptional(convexId("orders"));
             const result = valibotToConvex(schema);
             expect(result.kind).toBe("id");
             expect((result as any).tableName).toBe("orders");
@@ -180,7 +180,7 @@ describe("valibotToConvex", () => {
             const schema = valibot.object({
                 id: convexId("users"),
                 name: valibot.string(),
-                parentId: valibot.optional(convexId("users")),
+                parentId: valibot.exactOptional(convexId("users")),
                 categoryId: convexId("categories"),
             });
             const result = valibotToConvex(schema);
@@ -372,8 +372,8 @@ describe("valibotToConvex", () => {
             const schema = valibot.object({
                 id: valibot.string(), // required
                 name: valibot.string(), // required
-                email: valibot.optional(valibot.string()), // optional
-                phone: valibot.optional(valibot.string()), // optional
+                email: valibot.exactOptional(valibot.string()), // optional
+                phone: valibot.exactOptional(valibot.string()), // optional
                 address: valibot.string(), // required
             });
             const result = valibotToConvex(schema);
@@ -394,7 +394,7 @@ describe("valibotToConvex", () => {
         it("should convert object with optional fields", () => {
             const schema = valibot.object({
                 name: valibot.string(),
-                email: valibot.optional(valibot.string()),
+                email: valibot.exactOptional(valibot.string()),
                 phone: valibot.nullable(valibot.string()),
             });
             const result = valibotToConvex(schema);
@@ -687,7 +687,7 @@ describe("valibotToConvex", () => {
 
     describe("optional types", () => {
         it("should convert optional schema", () => {
-            const schema = valibot.optional(valibot.string());
+            const schema = valibot.exactOptional(valibot.string());
             const result = valibotToConvex(schema);
             expect(result.kind).toBe("string");
             expect((result as any).isOptional).toBe("optional");
@@ -700,16 +700,9 @@ describe("valibotToConvex", () => {
             expect((result as any).isOptional).toBe("required");
         });
 
-        it("should convert undefinedable schema", () => {
-            const schema = valibot.undefinedable(valibot.string());
-            const result = valibotToConvex(schema);
-            expect(result.kind).toBe("string");
-            expect((result as any).isOptional).toBe("optional");
-        });
-
         it("should handle non_optional schema", () => {
             const schema = valibot.nonOptional(
-                valibot.optional(valibot.string())
+                valibot.exactOptional(valibot.string())
             );
             const result = valibotToConvex(schema);
             expect(result.kind).toBe("string");
@@ -717,28 +710,28 @@ describe("valibotToConvex", () => {
         });
 
         it("should handle optional in non_optional context", () => {
-            const schema = valibot.optional(valibot.string());
+            const schema = valibot.exactOptional(valibot.string());
             const result = valibotToConvex(schema, { inNonOptional: true });
             expect(result.kind).toBe("string");
             expect((result as any).isOptional).toBe("required");
         });
 
         it("should convert optional number", () => {
-            const schema = valibot.optional(valibot.number());
+            const schema = valibot.exactOptional(valibot.number());
             const result = valibotToConvex(schema);
             expect(result.kind).toBe("float64");
             expect((result as any).isOptional).toBe("optional");
         });
 
         it("should convert optional boolean", () => {
-            const schema = valibot.optional(valibot.boolean());
+            const schema = valibot.exactOptional(valibot.boolean());
             const result = valibotToConvex(schema);
             expect(result.kind).toBe("boolean");
             expect((result as any).isOptional).toBe("optional");
         });
 
         it("should convert optional literal", () => {
-            const schema = valibot.optional(valibot.literal("status"));
+            const schema = valibot.exactOptional(valibot.literal("status"));
             const result = valibotToConvex(schema);
             expect(result.kind).toBe("literal");
             expect((result as any).value).toBe("status");
@@ -746,7 +739,7 @@ describe("valibotToConvex", () => {
         });
 
         it("should convert optional with complex wrapped type", () => {
-            const schema = valibot.optional(
+            const schema = valibot.exactOptional(
                 valibot.object({
                     name: valibot.string(),
                     age: valibot.number(),
@@ -762,7 +755,9 @@ describe("valibotToConvex", () => {
         });
 
         it("should convert optional array", () => {
-            const schema = valibot.optional(valibot.array(valibot.string()));
+            const schema = valibot.exactOptional(
+                valibot.array(valibot.string())
+            );
             const result = valibotToConvex(schema);
             expect(result.kind).toBe("array");
             expect((result as any).isOptional).toBe("optional");
@@ -771,7 +766,7 @@ describe("valibotToConvex", () => {
         });
 
         it("should convert optional union", () => {
-            const schema = valibot.optional(
+            const schema = valibot.exactOptional(
                 valibot.union([valibot.string(), valibot.number()])
             );
             const result = valibotToConvex(schema);
@@ -1094,7 +1089,7 @@ describe("valibotToConvex", () => {
                     valibot.object({
                         id: valibot.number(),
                         name: valibot.string(),
-                        email: valibot.optional(valibot.string()),
+                        email: valibot.exactOptional(valibot.string()),
                         role: valibot.union([
                             valibot.literal("admin"),
                             valibot.literal("user"),
@@ -1113,7 +1108,7 @@ describe("valibotToConvex", () => {
                     })
                 ),
                 settings: valibot.object({
-                    theme: valibot.optional(valibot.string()),
+                    theme: valibot.exactOptional(valibot.string()),
                     notifications: valibot.boolean(),
                 }),
             });
@@ -1230,12 +1225,14 @@ describe("valibotToConvex", () => {
                         title: valibot.string(),
                         content: valibot.string(),
                         authorId: convexId("users"),
-                        categoryId: valibot.optional(convexId("categories")),
+                        categoryId: valibot.exactOptional(
+                            convexId("categories")
+                        ),
                         tags: valibot.array(convexId("tags")),
                         metadata: valibot.object({
                             views: valibot.number(),
                             likes: valibot.array(convexId("users")),
-                            relatedPosts: valibot.optional(
+                            relatedPosts: valibot.exactOptional(
                                 valibot.array(convexId("posts"))
                             ),
                         }),

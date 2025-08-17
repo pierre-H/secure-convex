@@ -82,6 +82,11 @@ const myMutation = secureMutation(myDb);
 With myMutation, ctx.db will always performs `valibot.parseAsync` for `insert` `patch` and `replace`.
 There is alse a `ctx.insecureDb` which is the original convex db object.
 
+### Notes
+
+- Always use `exactOptional`, not `optional` or `undefinedable`, as convex doesn't support the value undefined
+- for union or variant table, use `defineSecureUnionTable` instead of `defineSecureTable`
+
 ## Permix
 
 You can also create a permix object from your schema :

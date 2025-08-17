@@ -182,8 +182,7 @@ export function valibotToConvex(
             );
         }
 
-        case "optional":
-        case "undefinedable": {
+        case "exact_optional": {
             const s = schema as OptionalLike;
 
             if (options?.inNonOptional) {
@@ -192,6 +191,10 @@ export function valibotToConvex(
 
             // Unwrap top-level optional (cohérent avec Convex)
             return v.optional(valibotToConvex(s.wrapped));
+        }
+        case "optional":
+        case "undefinedable": {
+            throw new ConvexError("optional or undefinedable is not supported");
         }
 
         case "non_optional": {
@@ -267,11 +270,6 @@ export function valibotToConvex(
                     >
                 ).options.map((option) => v.literal(option))
             );
-        }
-        case "exact_optional": {
-            return valibotToConvex({
-                type: schema.type,
-            });
         }
         case "function": {
             throw new ConvexError("Function is not supported.");
