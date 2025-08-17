@@ -1,4 +1,4 @@
-import { defineTable, type IdField } from "convex/server";
+import { type IdField } from "convex/server";
 import {
     v,
     type Validator,
