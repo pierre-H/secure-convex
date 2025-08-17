@@ -1,4 +1,4 @@
-import { defineTable } from "convex/server";
+import { defineTable, TableDefinition } from "convex/server";
 import {
     valibotToConvex,
     type ValibotTable,
@@ -9,7 +9,7 @@ import {
 export function defineSecureTable<
     T extends ValibotTable<O>,
     O extends OnlyObjectOptions,
->(tableDefinition: T) {
+>(tableDefinition: T): TableDefinition {
     const convexShape = Object.fromEntries(
         Object.entries(tableDefinition).map(([name, schema]) => [
             name,

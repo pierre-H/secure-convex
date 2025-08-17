@@ -1,6 +1,6 @@
 {
     "name": "secure-convex",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "description": "A library to secure your Convex database with Valibot and Permix",
     "author": {
         "name": "Pierre PIRNAY",
