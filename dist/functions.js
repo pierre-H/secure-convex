@@ -12,6 +12,7 @@ export function secureMutation(schema, mutation) {
                         ? tableDef
                         : v.objectAsync(tableDef);
                     const output = await v.parseAsync(validator, data);
+                    // Après validation Valibot, le type est sûr
                     return await ctx.db.insert(tableName, output);
                 }
                 return await ctx.db.insert(tableName, data);

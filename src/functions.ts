@@ -1,6 +1,5 @@
 import {
     customMutation,
-    customQuery,
     type CustomBuilder,
 } from "convex-helpers/server/customFunctions";
 import {
@@ -53,7 +52,8 @@ export function secureMutation<
 
                     const output = await v.parseAsync(validator, data);
 
-                    return await ctx.db.insert(tableName, output as any);
+                    // Après validation Valibot, le type est sûr
+                    return await ctx.db.insert(tableName, output as typeof data);
                 }
 
                 return await ctx.db.insert(tableName, data);
@@ -69,7 +69,7 @@ export function secureMutation<
 
                     const output = await v.parseAsync(validator, data);
 
-                    return await ctx.db.replace(id, output as any);
+                    return await ctx.db.replace(id, output as typeof data);
                 }
 
                 return await ctx.db.replace(id, data);
@@ -109,7 +109,7 @@ export function secureMutation<
 
                     const output = await v.parseAsync(validator, data);
 
-                    return await ctx.db.patch(id, output as any);
+                    return await ctx.db.patch(id, output as typeof data);
                 }
 
                 return await ctx.db.patch(id, data);
