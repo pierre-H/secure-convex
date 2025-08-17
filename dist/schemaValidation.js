@@ -88,7 +88,7 @@ export function valibotToConvex(schema, options) {
             if (options?.inNonOptional) {
                 return ensureRequired(valibotToConvex(s.wrapped));
             }
-            // Tu unwrappes le top-level optional (cohérent avec Convex)
+            // Unwrap top-level optional (cohérent avec Convex)
             return v.optional(valibotToConvex(s.wrapped));
         }
         case "non_optional": {

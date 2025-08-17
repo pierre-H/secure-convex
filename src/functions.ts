@@ -1,5 +1,6 @@
 import {
     customMutation,
+    customQuery,
     type CustomBuilder,
 } from "convex-helpers/server/customFunctions";
 import {
@@ -18,10 +19,11 @@ import type {
 import * as v from "valibot";
 
 export function secureMutation<
-    DataModel extends GenericDataModel,
-    Visibility extends FunctionVisibility,
+    S extends Record<keyof DataModel, ValibotTable<OnlyObjectOptions>>,
+    DataModel extends GenericDataModel = GenericDataModel,
+    Visibility extends FunctionVisibility = "public",
 >(
-    schema: Record<string, ValibotTable<OnlyObjectOptions>>,
+    schema: S,
     mutation: MutationBuilder<DataModel, Visibility>
 ): CustomBuilder<
     "mutation",

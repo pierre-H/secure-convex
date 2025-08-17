@@ -68,3 +68,41 @@ const schema = defineSchema({
 
 export default schema;
 ```
+
+Then, create a custom secure mutation :
+
+```ts
+// convex/test.ts
+import { secureMutation } from "secure-convex";
+import { myDb } from "./db.ts";
+
+const myMutation = secureMutation(myDb);
+```
+
+With myMutation, ctx.db will always performs `valibot.parseAsync` for `insert` `patch` and `replace`.
+There is alse a `ctx.insecureDb` which is the original convex db object.
+
+## Permix
+
+You can also create a permix object from your schema :
+
+```ts
+// convex/permix.ts
+import { createPermixFromDataModel } from "secure-convex";
+import type { DataModel } from "../_generated/dataModel";
+
+export const permix = createPermixFromDataModel<
+    DataModel,
+    {
+        users: {
+            action: "edit" | "delete";
+            dataRequired: true;
+        };
+        posts: {
+            action: "read";
+        };
+    }
+>();
+```
+
+The dataType is automatically inserted from the Convex data model for Convex table name.

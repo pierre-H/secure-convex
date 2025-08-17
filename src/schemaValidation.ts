@@ -33,7 +33,13 @@ export type AnyVSchema =
     | valibot.BaseSchema<unknown, unknown, valibot.BaseIssue<unknown>>
     | valibot.BaseSchemaAsync<unknown, unknown, valibot.BaseIssue<unknown>>;
 
+// Sortie d’un schéma (utilisé quand on sait qu’on a bien un schéma)
 type VOut<S extends AnyVSchema> = valibot.InferOutput<S>;
+
+// Helper: n’infère la sortie **que** si S est un schéma Valibot
+type InferSchemaOutput<S> = S extends AnyVSchema
+    ? valibot.InferOutput<S>
+    : never;
 
 // 2) Aides “structurales” (pas de `any`, pas besoin d’*Async* spécifiques)
 type SchemaOf<T extends string, Extra extends object = object> = AnyVSchema & {
@@ -47,7 +53,9 @@ type ArrayLike = SchemaOf<"array", { item: AnyVSchema }>;
 type ObjectLike = SchemaOf<"object", { entries: Record<string, AnyVSchema> }>;
 type RecordLike = SchemaOf<
     "record",
-    { /* key?: AnyVSchema (ignoré ici) */ value: AnyVSchema }
+    {
+        /* key?: AnyVSchema (ignoré ici) */ value: AnyVSchema;
+    }
 >;
 type UnionLike = SchemaOf<"union", { options: ReadonlyArray<AnyVSchema> }>;
 type OptionalLike = SchemaOf<"optional", { wrapped: AnyVSchema }>;
@@ -182,7 +190,7 @@ export function valibotToConvex(
                 return ensureRequired(valibotToConvex(s.wrapped));
             }
 
-            // Tu unwrappes le top-level optional (cohérent avec Convex)
+            // Unwrap top-level optional (cohérent avec Convex)
             return v.optional(valibotToConvex(s.wrapped));
         }
 
@@ -313,19 +321,30 @@ type ObjSchema = valibot.ObjectSchema<any, any>;
 // Tuple non vide de schémas d'objets uniquement
 export type OnlyObjectOptions = readonly [ObjSchema, ...ObjSchema[]];
 
-export type UnionTable<O extends OnlyObjectOptions> = valibot.UnionSchema<
-    O,
-    any
->;
+export type UnionTable<O extends OnlyObjectOptions> =
+    | valibot.UnionSchema<O, any>
+    | valibot.UnionSchemaAsync<O, any>;
+
+export type VariantTable<O extends OnlyObjectOptions> =
+    | valibot.VariantSchema<string, O, any>
+    | valibot.VariantSchemaAsync<string, O, any>;
 
 export type ValibotTable<O extends OnlyObjectOptions> =
     | Record<string, AnyVSchema>
-    | UnionTable<O>;
+    | UnionTable<O>
+    | VariantTable<O>;
+
+// ⚠️ Correction ici : ne jamais donner un Record directement à InferOutput
+export type InferValibotTable<T extends ValibotTable<OnlyObjectOptions>> =
+    T extends Record<string, AnyVSchema>
+        ? valibot.InferOutput<valibot.ObjectSchemaAsync<T, any>>
+        : InferSchemaOutput<Extract<T, AnyVSchema>>;
 
 type ConvexObjectShapeFromValibot<T extends Record<string, AnyVSchema>> = {
     [K in keyof T]: Validator<ConvexOut<T[K]>, OptionalProperty, string>;
 };
 
+// ⚠️ Correction ici : quand on infère à partir d’un schéma, on passe par InferSchemaOutput<Extract<...>>
 export type ConvexTableDefFromValibot<
     T extends ValibotTable<O>,
     O extends OnlyObjectOptions = OnlyObjectOptions,
@@ -334,9 +353,21 @@ export type ConvexTableDefFromValibot<
         ? ConvexObjectShapeFromValibot<T>
         : T extends valibot.UnionSchema<infer U, any>
           ? U extends OnlyObjectOptions
-              ? Validator<valibot.InferOutput<T>, "required", string>
+              ? Validator<
+                    InferSchemaOutput<Extract<T, AnyVSchema>>,
+                    "required",
+                    string
+                >
               : never
-          : never;
+          : T extends valibot.VariantSchema<string, infer U, any>
+            ? U extends OnlyObjectOptions
+                ? Validator<
+                      InferSchemaOutput<Extract<T, AnyVSchema>>,
+                      "required",
+                      string
+                  >
+                : never
+            : never;
 
 export function isValibotSchema(value: unknown): value is AnyVSchema {
     return (
